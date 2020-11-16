@@ -20,7 +20,8 @@ xml_foot = """
 influx_type_to_edm_type = {
     'float': 'Edm.Double',  # influxdb stores floats in a float64 format
     'integer': 'Edm.Int64',  # influxdb stores integers as 64-bit signed
-    'string': 'Edm.String'
+    'string': 'Edm.String',
+    'boolean': 'Edm.Boolean'
 }
 
 
