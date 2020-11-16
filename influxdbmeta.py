@@ -75,6 +75,21 @@ class InfluxDB(object):
 
         return tuple(distinct_fields.values())
 
+    '''
+    def fields(self, db_name):
+        """returns a tuple of dicts where each dict has attributes (name, type, edm_type)"""
+        fields_rs = self.client.query('SHOW FIELD KEYS', database=db_name)
+        tags_rs = self.client.query('SHOW TAG KEYS', database=db_name)
+        # expand and deduplicate
+        fields = set(tuple(f.items()) for f in chain(*chain(fields_rs, tags_rs)))
+        fields = (dict(
+            name=f[0][1],
+            type='string' if len(f)==1 else f[1][1],
+            edm_type=get_edm_type('string' if len(f)==1 else f[1][1])
+        ) for f in fields)
+        return tuple(fields)
+    '''
+
     @property
     def measurements(self):
         measurements = []
@@ -90,6 +105,7 @@ class InfluxDB(object):
                 d['mangled_path'] = db_name__measurement_name(db['name'], m['name'])
                 d['fields'] = self.fields(db['name'])
                 return d
+
             measurements.extend(m_dict(m) for m in rs.get_points())
         return measurements
 

@@ -4,7 +4,7 @@ import unittest
 import os
 try:
     from responses import RequestsMock
-except ImportError as e:
+except (ImportError, ModuleNotFoundError) as e:
     print('unit tests require responses library: try `pip install responses`')
     raise e
 from server import generate_metadata, get_sample_config, load_metadata

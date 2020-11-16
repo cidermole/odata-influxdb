@@ -9,8 +9,6 @@ This enables software such as Power BI, Excel, SAP, Drupal, and LINQPad to acces
 
 ## Requirements:
 
-python: Currently requires Python 2. Tested on latest 2.7.
-
 [pyslet](https://github.com/swl10/pyslet): The OData functionality from the pyslet project 
 is used in this project.
 

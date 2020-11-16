@@ -2,9 +2,7 @@ import argparse
 import logging
 import os
 import sys
-from urlparse import urlparse
-from ConfigParser import ConfigParser
-from wsgiref.simple_server import make_server
+from configparser import ConfigParser
 from werkzeug.wrappers import AuthorizationMixin, BaseRequest, Response
 from local import local, local_manager
 
@@ -64,12 +62,12 @@ def load_metadata(config):
     if config.getboolean('metadata', 'autogenerate'):
         logger.info("Generating OData metadata xml file from InfluxDB metadata")
         metadata = generate_metadata(dsn)
-        with open(metadata_filename, 'wb') as f:
+        with open(metadata_filename, 'w') as f:
             f.write(metadata)
 
     doc = edmx.Document()
-    with open(metadata_filename, 'rb') as f:
-        doc.ReadFromStream(f)
+    with open(metadata_filename, 'r') as f:
+        doc.read_from_stream(f)
     container = doc.root.DataServices['InfluxDBSchema.InfluxDB']
     try:
         topmax = config.getint('influxdb', 'max_items_per_query')
@@ -83,7 +81,7 @@ def configure_app(c, doc):
     service_root = c.get('server', 'service_advertise_root')
     logger.info("Advertising service at %s" % service_root)
     app = ReadOnlyServer(serviceRoot=service_root)
-    app.SetModel(doc)
+    app.set_model(doc)
     return app
 
 
@@ -134,7 +132,7 @@ def make_sample_config():
 def get_config(config):
     with open(config, 'r') as fp:
         c = get_sample_config()
-        c.readfp(fp)
+        c.read_file(fp)
     return c
 
 

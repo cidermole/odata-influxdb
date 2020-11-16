@@ -3,7 +3,7 @@ import numbers
 import logging
 import sys
 import influxdb
-from functools32 import lru_cache
+from functools import lru_cache
 from pyslet.iso8601 import TimePoint
 import pyslet.rfc2396 as uri
 from pyslet.odata2.core import EntityCollection, CommonExpression, PropertyExpression, BinaryExpression, \
@@ -11,6 +11,7 @@ from pyslet.odata2.core import EntityCollection, CommonExpression, PropertyExpre
 from pyslet.py2 import to_text
 
 from local import request
+
 
 logger = logging.getLogger("odata-influxdb")
 
@@ -24,6 +25,7 @@ operator_symbols = {
     getattr(Operator, 'and'): ' AND '  # Operator.and doesn't resolve in Python
 }
 
+
 @lru_cache()
 def get_tags_and_field_keys(client, measurement_name, db_name):
     client.switch_database(db_name)
@@ -34,12 +36,10 @@ def get_tags_and_field_keys(client, measurement_name, db_name):
 
 class InfluxDBEntityContainer(object):
     """Object used to represent an Entity Container (influxdb database)
-
     modelled after the SQLEntityContainer in pyslet (sqlds.py)
 
     container
         pyslet.odata2.csdl.EntityContainer
-
     dsn
         data source name in the format: influxdb://user:pass@host:port/
         supported schemes include https+influxdb:// and udp+influxdb://
@@ -122,7 +122,7 @@ class InfluxDBMeasurement(EntityCollection):
         if request and request.args.get('aggregate'):
             max_count = len(interval_list)
         else:
-            max_count = max(val for val in rs.get_points().next().values() if isinstance(val, numbers.Number))
+            max_count = max(val for val in rs.get_points().__next__().values() if isinstance(val, numbers.Number))
         self._influxdb_len = max_count
         return max_count
 
@@ -131,21 +131,17 @@ class InfluxDBMeasurement(EntityCollection):
 
     def set_expand(self, expand, select=None):
         """Sets the expand and select query options for this collection.
-
         The expand query option causes the named navigation properties
         to be expanded and the associated entities to be loaded in to
         the entity instances before they are returned by this collection.
-
         *expand* is a dictionary of expand rules.  Expansions can be chained,
         represented by the dictionary entry also being a dictionary::
-
                 # expand the Customer navigation property...
                 { 'Customer': None }
                 # expand the Customer and Invoice navigation properties
                 { 'Customer':None, 'Invoice':None }
                 # expand the Customer property and then the Orders property within Customer
                 { 'Customer': {'Orders':None} }
-
         The select query option restricts the properties that are set in
         returned entities.  The *select* option is a similar dictionary
         structure, the main difference being that it can contain the
@@ -161,12 +157,10 @@ class InfluxDBMeasurement(EntityCollection):
 
     def expand_entities(self, entityIterable):
         """Utility method for data providers.
-
         Given an object that iterates over all entities in the
         collection, returns a generator function that returns expanded
         entities with select rules applied according to
         :py:attr:`expand` and :py:attr:`select` rules.
-
         Data providers should use a better method of expanded entities
         if possible as this implementation simply iterates through the
         entities and calls :py:meth:`Entity.Expand` on each one."""
@@ -212,7 +206,7 @@ class InfluxDBMeasurement(EntityCollection):
         #fields = get_tags_and_field_keys(self.container.client, self.measurement_name, self.db_name)
 
         for measurement_name, tag_set in result.keys():
-            for row in result[measurement_name, tag_set]:
+            for row in result[set_measurement_name, tag_set]:
                 e = self.new_entity()
                 t = parse_influxdb_time(row['time'])
                 e['timestamp'].set_from_value(t)
@@ -328,9 +322,7 @@ class InfluxDBMeasurement(EntityCollection):
             return self._sql_where_expression(expression)
 
     def _format_literal(self, val):
-        if isinstance(val, unicode):
-            return u"'{}'".format(val)
-        elif isinstance(val, TimePoint):
+        if isinstance(val, TimePoint):
             return u"'{0.date} {0.time}'".format(val)
         else:
             return str(val)
@@ -339,7 +331,8 @@ class InfluxDBMeasurement(EntityCollection):
         raise NotImplementedError
 
     def set_page(self, top, skip=0, skiptoken=None):
-        self.top = int(top or 0) or self.topmax  # a None value for top causes the default iterpage method to set a skiptoken
+        self.top = int(
+            top or 0) or self.topmax  # a None value for top causes the default iterpage method to set a skiptoken
         self.skip = skip
         self.skiptoken = int(skiptoken or 0)
         self.nextSkiptoken = None
@@ -379,15 +372,13 @@ class InfluxDBMeasurement(EntityCollection):
 
     def get_next_page_location(self):
         """Returns the location of this page of the collection
-
         The result is a :py:class:`rfc2396.URI` instance."""
         token = self.next_skiptoken()
         if token is not None:
             baseURL = self.get_location()
             sysQueryOptions = {}
             if self.filter is not None:
-                sysQueryOptions[
-                    SystemQueryOption.filter] = unicode(self.filter)
+                sysQueryOptions[SystemQueryOption.filter] = str(self.filter)
             if self.expand is not None:
                 sysQueryOptions[
                     SystemQueryOption.expand] = format_expand(self.expand)
@@ -398,11 +389,11 @@ class InfluxDBMeasurement(EntityCollection):
                 sysQueryOptions[
                     SystemQueryOption.orderby] = CommonExpression.OrderByToString(
                     self.orderby)
-            sysQueryOptions[SystemQueryOption.skiptoken] = unicode(token)
+            sysQueryOptions[SystemQueryOption.skiptoken] = str(token)
             extraOptions = ''
             if request:
                 extraOptions = u'&' + u'&'.join([
-                                        u'{0}={1}'.format(k, v) for k, v in request.args.items() if k[0] != u'$'])
+                    u'{0}={1}'.format(k, v) for k, v in request.args.items() if k[0] != u'$'])
             return uri.URI.from_octets(
                 str(baseURL) +
                 "?" +
