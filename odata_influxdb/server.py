@@ -4,14 +4,14 @@ import os
 import sys
 from configparser import ConfigParser
 from werkzeug.wrappers import AuthorizationMixin, BaseRequest, Response
-from local import local, local_manager
+from .local import local, local_manager
 
 
 import pyslet.odata2.metadata as edmx
 from pyslet.odata2.server import ReadOnlyServer
 
-from influxdbmeta import generate_metadata
-from influxdbds import InfluxDBEntityContainer
+from .influxdbmeta import generate_metadata
+from .influxdbds import InfluxDBEntityContainer
 
 cache_app = None  #: our Server instance
 

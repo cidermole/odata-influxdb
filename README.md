@@ -16,7 +16,7 @@ is used in this project.
 
 Run the following command to generate a sample config file:
 
-`python server.py --makeSampleConfig`
+`python main.py --makeSampleConfig`
 
 Update the `dsn` in the conf file to reflect your InfluxDB server location.
 
@@ -24,7 +24,7 @@ You can change the hostname/port for the API server by updating
 `service_advertise_root`, `server_listen_interface`, and `server_listen_port`
 in the conf file.
 
-Start your odata endpoint server with `python server.py`.
+Start your odata endpoint server with `python main.py`.
 
 Point an OData browser to `http://hostname:8080/`
 

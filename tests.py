@@ -7,9 +7,9 @@ try:
 except (ImportError, ModuleNotFoundError) as e:
     print('unit tests require responses library: try `pip install responses`')
     raise e
-from server import generate_metadata, get_sample_config, load_metadata
-from influxdbmeta import db_name__measurement_name, mangle_db_name, mangle_measurement_name
-from influxdbds import unmangle_measurement_name, unmangle_db_name, unmangle_entity_set_name
+from odata_influxdb.server import generate_metadata, get_sample_config, load_metadata
+from odata_influxdb.influxdbmeta import db_name__measurement_name, mangle_db_name, mangle_measurement_name
+from odata_influxdb.influxdbds import unmangle_measurement_name, unmangle_db_name, unmangle_entity_set_name
 from pyslet.odata2 import core
 
 NUM_TEST_POINTS = 100

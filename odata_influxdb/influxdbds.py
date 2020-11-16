@@ -10,7 +10,7 @@ from pyslet.odata2.core import EntityCollection, CommonExpression, PropertyExpre
     LiteralExpression, Operator, SystemQueryOption, format_expand, format_select, ODataURI
 from pyslet.py2 import to_text
 
-from local import request
+from .local import request
 
 
 logger = logging.getLogger("odata-influxdb")
@@ -206,7 +206,7 @@ class InfluxDBMeasurement(EntityCollection):
         #fields = get_tags_and_field_keys(self.container.client, self.measurement_name, self.db_name)
 
         for measurement_name, tag_set in result.keys():
-            for row in result[set_measurement_name, tag_set]:
+            for row in result[measurement_name, tag_set]:
                 e = self.new_entity()
                 t = parse_influxdb_time(row['time'])
                 e['timestamp'].set_from_value(t)
