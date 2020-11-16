@@ -62,12 +62,17 @@ class InfluxDB(object):
         tags_rs = self.client.query('SHOW TAG KEYS', database=db_name)
         # expand and deduplicate
         fields = set(tuple(f.items()) for f in chain(*chain(fields_rs, tags_rs)))
-        fields = (dict(
-            name=f[0][1],
-            type='string' if len(f)==1 else f[1][1],
-            edm_type=get_edm_type('string' if len(f)==1 else f[1][1])
-        ) for f in fields)
-        return tuple(fields)
+
+        # deduplicate fields and tags with the same name (even for same field/tag with different type [e.g. numeric vs. string])
+        distinct_fields = {}
+        for f in fields:
+            name = f[0][1]
+            _type = 'string' if len(f)==1 else f[1][1]
+            edm_type = get_edm_type('string' if len(f)==1 else f[1][1])
+            if not name in distinct_fields:
+                distinct_fields[name] = dict(name=name, type=_type, edm_type=edm_type)
+
+        return tuple(distinct_fields.values())
 
     @property
     def measurements(self):

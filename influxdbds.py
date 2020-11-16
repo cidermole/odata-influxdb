@@ -223,12 +223,16 @@ class InfluxDBMeasurement(EntityCollection):
                         try:
                             entity_property = e[influxdb_field_name]
                         except KeyError:
+                            if influxdb_field_name.endswith('_1') and influxdb_field_name[:-2] in e:
+                                # ignore tags with the same name as fields, provide only the field
+                                continue
                             # assume aggregated field
                             entity_property = e[self.non_aggregate_field_name(influxdb_field_name)]
                         entity_property.set_from_value(influxdb_field_value)
                     if tag_set is not None:
                         for tag, value in tag_set.items():
-                            e[tag].set_from_value(value)
+                            if not tag in e:
+                                e[tag].set_from_value(value)
                 else:
                     for odata_field_name in self.select:
                         if odata_field_name == 'timestamp':
